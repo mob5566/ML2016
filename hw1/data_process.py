@@ -3,6 +3,10 @@
 import numpy as np
 import csv
 
+###
+### Process Training data
+###
+
 # get training data from train.csv
 csv_input = csv.reader(open('data/train.csv', 'rb'))
 
@@ -49,3 +53,34 @@ training_data = np.array(training_data)
 # save the trainable data to numpy file
 np.save('data/trainable.npy', training_data)
 
+###
+### Process Testing data
+###
+
+# get testing data from test_X.csv
+csv_input = csv.reader(open('data/test_X.csv', 'rb'))
+
+data = []
+
+for row in csv_input:
+	data.append(row)
+
+data = np.array(data)
+
+# delete the header columns
+data = data[:, 2:]
+
+# convert the 'NR' no rain string to 0
+data[ data[:,:]=='NR' ] = '0'
+data = data.astype(np.float)
+
+testing_data = []
+
+# transform data to nine-hour elements 18*9 features
+for i in np.arange(240):
+	testing_data.append( data[i*18:(i+1)*18, :].T.flatten() )
+
+testing_data = np.array(testing_data)
+
+# save the testable data from test_X.csv
+np.save('data/testable.npy', testing_data)
