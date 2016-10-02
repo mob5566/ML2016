@@ -62,7 +62,7 @@ class LinearRegression(object):
 		for i in np.arange(maxIter):
 			
 			if useSGD:
-				rnd = np.random.randint(0, len(X))
+				rnd = np.random.randint(0, len(X)-100)
 				u = X[rnd:rnd+100]
 				v = y[rnd:rnd+100]
 			else:
