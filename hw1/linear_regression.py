@@ -19,12 +19,11 @@ y = training_data[:, -1]
 Xtest = np.load('data/testable.npy')
 
 # setup linear regression model
-model = lrm.LinearRegression()
+model = lrm.LinearRegression( 10000, 10., useL2R=True, useAdagrad=True)
+# model = lrm.LinearRegression( 100000, 10., useL2R=True, useSGD=True)
 
 print('Training...')
-model.fit(X, y, 10000, 10., useL2R=True, useAdagrad=True)
-# model.fit(X, y, 10000, 10., useAdagrad=True)
-# model.fit(X, y, 100000, 1., useSGD=True)
+model.fit(X, y)
 print('Done!')
 
 # make prediction
