@@ -13,15 +13,16 @@ Provides:
 ===
 Document
 
-class LinearRegression( LearningRate=1. ):
+class LinearRegression():
 	The linear regression model.
 
-	fit( X, y, maxIter=100, useL2R=False, L2R_lambda=1.,
+	fit( X, y, maxIter=100, eta=1., useL2R=False, L2R_lambda=1.,
 		useSGD=False, batchSize=100, useAdagrad=False ) 
 	- fit the training data (X, y)
 		X: training data features X
 		y: training data output y
 		maxIter: the maximum gradient descent iterations
+		eta: the learning rate of gradient descent
 		useL2R: use L2 Regularization
 		L2R_lambda: if use L2 Reg., the penalty value lambda
 		useSGD: use Stochastic Gradient Descent
@@ -40,10 +41,7 @@ class LinearRegression( LearningRate=1. ):
 import numpy as np
 
 class LinearRegression(object):
-	def __init__(self, eta=1.):
-		self.eta = eta
-
-	def fit(self, X, y, maxIter=100, useL2R=False, L2R_lambda=1.,\
+	def fit(self, X, y, maxIter=100, eta=1., useL2R=False, L2R_lambda=1.,\
 			useSGD=False, batchSize=100, useAdagrad=False):
 
 		# check whether the training data is empty or not
@@ -80,6 +78,10 @@ class LinearRegression(object):
 			dw = np.dot(2*((np.dot(u, self._w)+self._b)-v), u)
 			db = 2*(((np.dot(u, self._w)+self._b)-v).sum())
 
+			# if use L2 Regularization
+			if useL2R:
+				dw = dw+2*L2R_lambda*self._w.sum()
+
 			# if use Adagrad
 			if useAdagrad:
 				acc_dw = acc_dw+dw**2
@@ -88,14 +90,11 @@ class LinearRegression(object):
 				db = db/np.sqrt(acc_db)
 			
 			# update the w and b
-			self._w = self._w-self.eta*dw
-			self._b = self._b-self.eta*db
+			self._w = self._w-eta*dw
+			self._b = self._b-eta*db
 	
 	def predict(self, x):
 		return np.dot(np.array(x), self._w)+self._b
-
-	def setEta(self, eta):
-		self.eta = eta
 	
 	def getW(self):
 		return self._w
