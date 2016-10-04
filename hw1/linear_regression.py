@@ -8,6 +8,7 @@
 import numpy as np
 import linreg_model as lrm
 import csv
+import time
 
 # load training data
 training_data = np.load('data/trainable.npy')
@@ -19,12 +20,13 @@ y = training_data[:, -1]
 Xtest = np.load('data/testable.npy')
 
 # setup linear regression model
-model = lrm.LinearRegression( 10000, 10., useL2R=True, useAdagrad=True)
-# model = lrm.LinearRegression( 100000, 10., useL2R=True, useSGD=True)
+model = lrm.LinearRegression( 100000, 100., False, 100, useAdagrad=True, useSGD=True)
 
 print('Training...')
+tstart = time.time()
 model.fit(X, y)
 print('Done!')
+print('Training cost %.3f seconds!' % (time.time()-tstart))
 
 # make prediction
 yout = model.predict(Xtest)

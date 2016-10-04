@@ -14,7 +14,9 @@ Provides:
 Document
 
 class LinearRegression( maxIter=100, eta=1., useL2R=False, L2R_lambda=1.,
-		useSGD=False, batchSize=100, useAdagrad=False ) 
+		useSGD=False, batchSize=100,
+		useSGDRandomSample=True, SGDRandSampProb=0.05,
+		, useAdagrad=False):
 	- The linear regression model.
 
 		maxIter: the maximum gradient descent iterations
@@ -24,6 +26,9 @@ class LinearRegression( maxIter=100, eta=1., useL2R=False, L2R_lambda=1.,
 		useSGD: use Stochastic Gradient Descent
 		batchSize: if use SGD, the batchSize is the size of SGD batch
 		useAdagrad: use Adagrad in gradient descent
+		useSGDRandomSample: if use SGD and use SGD random sample, it will sample training
+			data randomly from data
+		SGDRandSampleProb: the probability of sampling training data
 
 	fit( X, y ) - fit the training data (X, y)
 
@@ -76,7 +81,9 @@ import numpy as np
 
 class LinearRegression(object):
 	def __init__(self, maxIter=100, eta=1., useL2R=False, L2R_lambda=1.,\
-				useSGD=False, batchSize=100, useAdagrad=False):
+				useSGD=False, batchSize=100,\
+				useSGDRandomSample=False, SGDRandSampProb=0.05,\
+				useAdagrad=False):
 		
 		self.maxIter = maxIter
 		self.eta = eta
@@ -84,6 +91,8 @@ class LinearRegression(object):
 		self.L2R_lambda = L2R_lambda
 		self.useSGD = useSGD
 		self.batchSize = batchSize
+		self.useSGDRS = useSGDRandomSample
+		self.useSGDrsp = SGDRandSampProb
 		self.useAdagrad = useAdagrad
 
 	def fit(self, X, y):
@@ -111,9 +120,14 @@ class LinearRegression(object):
 		for i in np.arange(self.maxIter):
 			
 			if self.useSGD:
-				rnd = np.random.randint(0, len(X)-self.batchSize)
-				u = X[rnd:rnd+self.batchSize]
-				v = y[rnd:rnd+self.batchSize]
+				if self.useSGDRS:
+					rndmask = np.random.rand(len(X))<self.useSGDrsp
+					u = X[rndmask]
+					v = y[rndmask]
+				else:
+					rnd = np.random.randint(0, len(X)-self.batchSize)
+					u = X[rnd:rnd+self.batchSize]
+					v = y[rnd:rnd+self.batchSize]
 			else:
 				u = X
 				v = y
