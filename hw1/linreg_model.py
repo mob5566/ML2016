@@ -16,6 +16,7 @@ Document
 class LinearRegression( maxIter=100, eta=1., useL2R=False, L2R_lambda=1.,
 		useSGD=False, batchSize=100, useAdagrad=False ) 
 	- The linear regression model.
+
 		maxIter: the maximum gradient descent iterations
 		eta: the learning rate of gradient descent
 		useL2R: use L2 Regularization
@@ -25,13 +26,49 @@ class LinearRegression( maxIter=100, eta=1., useL2R=False, L2R_lambda=1.,
 		useAdagrad: use Adagrad in gradient descent
 
 	fit( X, y ) - fit the training data (X, y)
-		X: training data features X
-		y: training data output y
+
+		X: training data input features
+		y: training data output labels
 	
 	predict( X ): y - given the input X, then predict the
 	corresponding output y
+
 		X: the features used to predict
 		y: the prediction of X
+
+=====
+
+def RMSE(model, X, y) - the root-mean-square deviation error
+		
+		model: the model to be evaluated
+		X: the test data input features
+		y: the test data output labels
+
+=====
+
+class cross_valid( models, X, y, errf=RMSE, fold=10 ) - the cross validation model selection
+		
+		models: input models to be selected from
+		X: the data set input features
+		y: the data set output labels
+		errf: the error function for evaluate performance
+		fold: the number of sets to be folded
+	
+	scores() - do cross validation on folded training data and select the best model
+
+=====
+
+class validation( models, X, y, errf=RMSE, validsetprob=0.4 ) 
+	- the model selection by validation
+		
+		models: input models to be selected from
+		X: the data set input features
+		y: the data set output labels
+		errf: the error function for evaluate performance
+		validsetprob: the sampling probability of validation set
+
+	scores() - do validation on random sampled training data and
+		select the best model by validation set
 
 '''
 
@@ -99,6 +136,7 @@ class LinearRegression(object):
 			# update the w and b
 			self._w = self._w-self.eta*dw
 			self._b = self._b-self.eta*db
+
 	
 	def predict(self, x):
 		return np.dot(np.array(x), self._w)+self._b
@@ -151,5 +189,122 @@ class LinearRegression(object):
 
 	def setB(self, b):
 		self._b = b
-	
 
+def RMSE(model, X, y):
+	yout = model.predict(X)
+	return np.sqrt(((yout-y)**2).sum()/len(X))
+	
+class cross_valid(object):
+	def __init__(self, models, X, y, errf=RMSE, fold=10):
+		self.models = models
+		
+		# check whether the size of X and y are the same
+		if len(X) != len(y):
+			raise AssertionError
+
+		self.X = np.array(X)
+		self.y = np.array(y)
+		
+		self.errf = errf
+		self.fold = fold
+	
+	def scores(self):
+		
+		data_num = len(self.X)
+		features_num = len(self.X[0])
+		batchSize = np.floor(data_num/self.fold)
+
+		# random permute 
+		data = np.random.permutation(np.insert(self.X, features_num, self.y, axis=1))
+		
+		X = data[:batchSize*self.fold, :-1].reshape(self.fold, batchSize, features_num)
+		y = data[:batchSize*self.fold, -1].reshape(self.fold, batchSize)
+
+		mrow = len(self.models)
+		mcol = len(self.models[0])
+
+		self.scores = np.zeros(mrow*mcol).reshape(mrow, mcol)
+
+		# for each input models
+		for i in np.arange(mrow):
+			for j in np.arange(mcol):
+				
+				# cross validation
+				for k in np.arange(self.fold):
+
+					# get the training set mask
+					mask = np.arange(self.fold)!=k
+
+					# train the model by training set
+
+					self.models[i][j].fit(\
+						X[mask, :, :].reshape((self.fold-1)*batchSize, features_num),\
+						y[mask, :].reshape((self.fold-1)*batchSize))
+
+					# evaluate by error function
+					self.scores[i, j] = self.scores[i, j]+\
+						self.errf(self.models[i][j], X[k, :], y[k, :])
+
+				self.scores[i, j] = self.scores[i, j]/self.fold
+
+		print( self.scores )
+
+		self.bestmodel_r = np.argmin(self.scores)/mcol
+		self.bestmodel_c = np.argmin(self.scores)%mcol
+		self.bestmodel = self.models[self.bestmodel_r][self.bestmodel_c]
+	
+	def getBestModel(self):
+		return self.bestmodel
+
+	def getScores(self):
+		return self.scores
+
+class validation(object):
+	def __init__(self, models, X, y, errf=RMSE, validsetprob=0.4):
+		self.models = models
+		
+		# check whether the size of X and y are the same
+		if len(X) != len(y):
+			raise AssertionError
+
+		self.X = np.array(X)
+		self.y = np.array(y)
+		
+		self.errf = errf
+		self.vsp = validsetprob
+	
+	def scores(self):
+		
+		data_num = len(self.X)
+		features_num = len(self.X[0])
+		trainmask = np.random.rand(data_num)>=self.vsp
+		validmask = np.logical_not(trainmask)
+
+		mrow = len(self.models)
+		mcol = len(self.models[0])
+
+		self.scores = np.zeros(mrow*mcol).reshape(mrow, mcol)
+
+		# for each input models
+		for i in np.arange(mrow):
+			for j in np.arange(mcol):
+
+				# train the model by training set
+				self.models[i][j].fit(self.X[trainmask, :], self.y[trainmask])
+
+				# evaluate by error function
+				self.scores[i, j] = self.errf(\
+					self.models[i][j], self.X[validmask, :], self.y[validmask])
+
+		print( self.scores )
+
+		self.bestmodel_r = np.argmin(self.scores)/mcol
+		self.bestmodel_c = np.argmin(self.scores)%mcol
+
+		self.bestmodel = self.models[self.bestmodel_r][self.bestmodel_c]
+	
+	def getBestModel(self):
+		return self.bestmodel
+
+	def getScores(self):
+		return self.scores
