@@ -27,9 +27,10 @@ models = [[]]*5
 		# for lam in [0, 1, 10, 100, 10000]] 
 
 models = [
-[lrm.LinearRegression(100000, 100, True, 100, useAdagrad=True, useSGD=True, batchSize=100)], 
-[lrm.LinearRegression(200000, 100, True, 100, useAdagrad=True, useSGD=True, batchSize=100)],
-[lrm.LinearRegression(500000, 100, True, 100, useAdagrad=True, useSGD=True, batchSize=100)]]
+[lrm.LinearRegression(100000, 100, True, 100, useAdagrad=True, useSGD=False, batchSize=100)], 
+[lrm.LinearRegression(100000, 100, True, 100, useAdagrad=True, useSGD=True, batchSize=100)],
+[lrm.LinearRegression(100000, 100, True, 100, useAdagrad=True, useSGD=True, batchSize=300)],
+[lrm.LinearRegression(100000, 100, True, 100, useAdagrad=True, useSGD=True, batchSize=500)]]
 
 valid = lrm.validation(models, X, y, lrm.RMSE, 0.3 )
 

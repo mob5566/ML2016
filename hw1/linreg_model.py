@@ -142,8 +142,9 @@ class LinearRegression(object):
 
 			# if use Adagrad
 			if self.useAdagrad:
-				acc_dw = acc_dw+dw**2
+				acc_dw = acc_dw+np.dot(dw, dw)
 				acc_db = acc_db+db**2
+
 				dw = dw/np.sqrt(acc_dw)
 				db = db/np.sqrt(acc_db)
 			
