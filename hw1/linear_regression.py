@@ -20,7 +20,7 @@ y = training_data[:, -1]
 Xtest = np.load('data/testable.npy')
 
 # setup linear regression model
-model = lrm.LinearRegression( 100000, 100., False, 100, useAdagrad=True, useSGD=True)
+model = lrm.linreg( 100000, 100., False, 100, useAdagrad=True, useSGD=True)
 
 print('Training...')
 tstart = time.time()

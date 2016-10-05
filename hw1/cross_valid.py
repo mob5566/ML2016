@@ -23,7 +23,7 @@ models = [[]]*5
 
 # setup linear regression models
 for i, eta in enumerate([1e-4, 1e-2, 1, 100, 10000]):
-	models[i] = [lrm.LinearRegression(10000, eta, True, lam, useAdagrad=True)\
+	models[i] = [lrm.linreg(10000, eta, True, lam, useAdagrad=True)\
 		for lam in [0, 1, 10, 100, 10000]] 
 
 cv = lrm.cross_valid(models, X, y, lrm.RMSE)

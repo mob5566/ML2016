@@ -21,7 +21,7 @@ y = training_data[:, -1]
 Xtest = np.load('data/testable.npy')
 
 paras = (10000, 100, False, 1, True, 100, False, 0, True)
-bag = bm.bagging(lrm.LinearRegression, paras)
+bag = bm.bagging(lrm.linreg, paras)
 
 print('Training...')
 tstart = time.time()

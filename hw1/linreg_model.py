@@ -13,7 +13,7 @@ Provides:
 ===
 Document
 
-class LinearRegression( maxIter=100, eta=1., useL2R=False, L2R_lambda=1.,
+class linreg( maxIter=100, eta=1., useL2R=False, L2R_lambda=1.,
 		useSGD=False, batchSize=100,
 		useSGDRandomSample=True, SGDRandSampProb=0.05,
 		, useAdagrad=False):
@@ -79,7 +79,7 @@ class validation( models, X, y, errf=RMSE, validsetprob=0.4 )
 
 import numpy as np
 
-class LinearRegression(object):
+class linreg(object):
 	def __init__(self, maxIter=100, eta=1., useL2R=False, L2R_lambda=1.,\
 				useSGD=False, batchSize=100,\
 				useSGDRandomSample=False, SGDRandSampProb=0.05,\

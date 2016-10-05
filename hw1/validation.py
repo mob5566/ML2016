@@ -23,14 +23,14 @@ models = [[]]*5
 
 # setup linear regression models
 # for i, eta in enumerate([1e-4, 1e-2, 1, 100, 10000]):
-	# models[i] = [lrm.LinearRegression(10000, eta, True, lam, useAdagrad=True)\
+	# models[i] = [lrm.linreg(10000, eta, True, lam, useAdagrad=True)\
 		# for lam in [0, 1, 10, 100, 10000]] 
 
 models = [
-[lrm.LinearRegression(100000, 100, True, 100, useAdagrad=True, useSGD=False, batchSize=100)], 
-[lrm.LinearRegression(100000, 100, True, 100, useAdagrad=True, useSGD=True, batchSize=100)],
-[lrm.LinearRegression(100000, 100, True, 100, useAdagrad=True, useSGD=True, batchSize=300)],
-[lrm.LinearRegression(100000, 100, True, 100, useAdagrad=True, useSGD=True, batchSize=500)]]
+[lrm.linreg(100000, 100, True, 100, useAdagrad=True, useSGD=False, batchSize=100)], 
+[lrm.linreg(100000, 100, True, 100, useAdagrad=True, useSGD=True, batchSize=100)],
+[lrm.linreg(100000, 100, True, 100, useAdagrad=True, useSGD=True, batchSize=300)],
+[lrm.linreg(100000, 100, True, 100, useAdagrad=True, useSGD=True, batchSize=500)]]
 
 valid = lrm.validation(models, X, y, lrm.RMSE, 0.3 )
 
