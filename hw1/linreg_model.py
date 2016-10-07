@@ -108,6 +108,9 @@ class linreg(object):
 		X = np.array(X)
 		y = np.array(y)
 
+		# set random seed
+		np.random.seed(0)
+
 		# initialize weights w and bias b with zeros
 		self._w = np.random.rand(X.shape[1])
 		self._b = np.array(0)
@@ -146,7 +149,7 @@ class linreg(object):
 				acc_db = acc_db+db**2
 
 				dw = dw/np.sqrt(acc_dw)
-				db = db/np.sqrt(acc_db)
+				# db = db/np.sqrt(acc_db)
 			
 			# update the w and b
 			self._w = self._w-self.eta*dw
@@ -229,6 +232,9 @@ class cross_valid(object):
 		features_num = len(self.X[0])
 		batchSize = np.floor(data_num/self.fold)
 
+		# set random seed
+		np.random.seed(0)
+
 		# random permute 
 		data = np.random.permutation(np.insert(self.X, features_num, self.y, axis=1))
 		
@@ -289,6 +295,9 @@ class validation(object):
 		self.vsp = validsetprob
 	
 	def scores(self):
+
+		# set random seed
+		np.random.seed(0)
 		
 		data_num = len(self.X)
 		features_num = len(self.X[0])
@@ -299,6 +308,7 @@ class validation(object):
 		mcol = len(self.models[0])
 
 		self.scores = np.zeros(mrow*mcol).reshape(mrow, mcol)
+		self.ein = np.zeros(mrow*mcol).reshape(mrow, mcol)
 
 		# for each input models
 		for i in np.arange(mrow):
@@ -311,7 +321,11 @@ class validation(object):
 				self.scores[i, j] = self.errf(\
 					self.models[i][j], self.X[validmask, :], self.y[validmask])
 
-		print( self.scores )
+				self.ein[i, j] = self.errf(\
+					self.models[i][j], self.X[trainmask, :], self.y[trainmask])
+
+		print 'Ein:\n', self.ein 
+		print 'Scores:\n', self.scores 
 
 		self.bestmodel_r = np.argmin(self.scores)/mcol
 		self.bestmodel_c = np.argmin(self.scores)%mcol

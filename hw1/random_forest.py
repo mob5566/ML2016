@@ -21,22 +21,22 @@ y = training_data[:, -1]
 # load testing data
 Xtest = np.load('data/testable.npy')
 
-paras = (None, 0.5)
-bag = em.bagging(dt.dtree, paras, 100, 0.7)
+paras = (None, 0.333)
+rf = em.random_forest(dt.dtree, paras, 1000, 1.)
 
 print('Training...')
 tstart = time.time()
-bag.fit(X, y)
+rf.fit(X, y)
 print('Done!')
 print('Training cost %.3f seconds!' % (time.time()-tstart))
 
 # output RMSE of insample
-print('RMSE = %.3f' % lrm.RMSE(bag, X, y))
+print('RMSE = %.3f' % lrm.RMSE(rf, X, y))
 
 # make prediction
-yout = bag.predict(Xtest)
+yout = rf.predict(Xtest)
 
-outputfile = open('linear_regression.csv', 'wb')
+outputfile = open('random_forest.csv', 'wb')
 csv_output = csv.writer(outputfile)
 
 csv_output.writerow(['id', 'value'])
