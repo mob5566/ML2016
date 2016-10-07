@@ -13,9 +13,8 @@ Provides:
 ===
 Document
 
-class linreg( maxIter=100, eta=1., useL2R=False, L2R_lambda=1.,
+class linreg( maxIter=100, eta=1e-2, useL2R=False, L2R_lambda=1.,
 		useSGD=False, batchSize=100,
-		useSGDRandomSample=True, SGDRandSampProb=0.05,
 		, useAdagrad=False):
 	- The linear regression model.
 
@@ -26,9 +25,6 @@ class linreg( maxIter=100, eta=1., useL2R=False, L2R_lambda=1.,
 		useSGD: use Stochastic Gradient Descent
 		batchSize: if use SGD, the batchSize is the size of SGD batch
 		useAdagrad: use Adagrad in gradient descent
-		useSGDRandomSample: if use SGD and use SGD random sample, it will sample training
-			data randomly from data
-		SGDRandSampleProb: the probability of sampling training data
 
 	fit( X, y ) - fit the training data (X, y)
 
@@ -79,10 +75,11 @@ class validation( models, X, y, errf=RMSE, validsetprob=0.4 )
 
 import numpy as np
 
+eps = 1e-8
+
 class linreg(object):
-	def __init__(self, maxIter=100, eta=1., useL2R=False, L2R_lambda=1.,\
+	def __init__(self, maxIter=100, eta=1e-2, useL2R=False, L2R_lambda=1.,\
 				useSGD=False, batchSize=100,\
-				useSGDRandomSample=False, SGDRandSampProb=0.05,\
 				useAdagrad=False):
 		
 		self.maxIter = maxIter
@@ -91,8 +88,6 @@ class linreg(object):
 		self.L2R_lambda = L2R_lambda
 		self.useSGD = useSGD
 		self.batchSize = batchSize
-		self.useSGDRS = useSGDRandomSample
-		self.useSGDrsp = SGDRandSampProb
 		self.useAdagrad = useAdagrad
 
 	def fit(self, X, y):
@@ -119,42 +114,63 @@ class linreg(object):
 		acc_dw = np.zeros(X.shape[1])
 		acc_db = np.array(0)
 
+		self.hist_e = []
+
 		# gradient descent
 		for i in np.arange(self.maxIter):
 			
 			if self.useSGD:
-				if self.useSGDRS:
-					rndmask = np.random.rand(len(X))<self.useSGDrsp
-					u = X[rndmask]
-					v = y[rndmask]
-				else:
-					rnd = np.random.randint(0, len(X)-self.batchSize)
-					u = X[rnd:rnd+self.batchSize]
-					v = y[rnd:rnd+self.batchSize]
+				rmask = np.arange(len(X))
+				np.random.shuffle(rmask)
+				mX = X[rmask]
+				my = y[rmask]
+
+				for i in np.arange(0, len(X)-self.batchSize, self.batchSize):
+					tX = mX[i:i+self.batchSize]
+					ty = my[i:i+self.batchSize]
+
+					# calculate the gradient of square error with current w and b
+					dw = np.dot(2*((np.dot(tX, self._w)+self._b)-ty), tX)
+					db = 2*(((np.dot(tX, self._w)+self._b)-ty).sum())
+	
+					# if use L2 Regularization
+					if self.useL2R:
+						dw = dw+2*self.L2R_lambda*self._w.sum()
+	
+					# if use Adagrad
+					if self.useAdagrad:
+						acc_dw = acc_dw+dw**2
+						acc_db = acc_db+db**2
+	
+						dw = dw/np.sqrt(acc_dw+eps)
+						db = db/np.sqrt(acc_db+eps)
+					
+					# update the w and b
+					self._w = self._w-self.eta*dw
+					self._b = self._b-self.eta*db
+				
 			else:
-				u = X
-				v = y
+				# calculate the gradient of square error with current w and b
+				dw = np.dot(2*((np.dot(X, self._w)+self._b)-y), X)
+				db = 2*(((np.dot(X, self._w)+self._b)-y).sum())
 
-			# calculate the gradient of square error with current w and b
-			dw = np.dot(2*((np.dot(u, self._w)+self._b)-v), u)
-			db = 2*(((np.dot(u, self._w)+self._b)-v).sum())
+				# if use L2 Regularization
+				if self.useL2R:
+					dw = dw+2*self.L2R_lambda*self._w.sum()
 
-			# if use L2 Regularization
-			if self.useL2R:
-				dw = dw+2*self.L2R_lambda*self._w.sum()
+				# if use Adagrad
+				if self.useAdagrad:
+					acc_dw = acc_dw+dw**2
+					acc_db = acc_db+db**2
 
-			# if use Adagrad
-			if self.useAdagrad:
-				acc_dw = acc_dw+np.dot(dw, dw)
-				acc_db = acc_db+db**2
-
-				dw = dw/np.sqrt(acc_dw)
-				# db = db/np.sqrt(acc_db)
+					dw = dw/np.sqrt(acc_dw+eps)
+					db = db/np.sqrt(acc_db+eps)
 			
-			# update the w and b
-			self._w = self._w-self.eta*dw
-			self._b = self._b-self.eta*db
+				# update the w and b
+				self._w = self._w-self.eta*dw
+				self._b = self._b-self.eta*db
 
+			self.hist_e.append(RMSE(self, X, y))
 	
 	def predict(self, x):
 		return np.dot(np.array(x), self._w)+self._b

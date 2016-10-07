@@ -23,18 +23,14 @@ y = training_data[:, -1]
 # load testing data
 Xtest = np.load('data/testable.npy')
 
-# setup linear regression models
-# for i, eta in enumerate([1e-4, 1e-2, 1, 100, 10000]):
-	# models[i] = [lrm.linreg(10000, eta, True, lam, useAdagrad=True)\
-		# for lam in [0, 1, 10, 100, 10000]] 
+# setup learning models
+
 #
 # Linear Regression
 #
 models = [
-[lrm.linreg(100000, 100, False, 100, useAdagrad=True, useSGD=False, batchSize=100)], 
-[lrm.linreg(100000, 100, True, 10, useAdagrad=True, useSGD=True, batchSize=100)],
-[lrm.linreg(100000, 100, True, 100, useAdagrad=True, useSGD=True, batchSize=100)],
-[lrm.linreg(100000, 100, True, 100, useAdagrad=True, useSGD=True, batchSize=300)]]
+[lrm.linreg(1000, 1e-2, True, 100, useAdagrad=True, useSGD=True, batchSize=100)],
+[lrm.linreg(1000, 100, True, 100, useAdagrad=True, useSGD=True, batchSize=100)]]
 
 #
 # Decision Tree
@@ -73,6 +69,12 @@ print('Training cost %.3f seconds!' % (time.time()-tstart))
 
 # output RMSE of insample
 print('RMSE = %.3f' % lrm.RMSE(valid.getBestModel(), X, y))
+
+# plot the learning curve
+import matplotlib.pyplot as plt
+plt.plot(np.arange(len(models[0][0].hist_e)), models[0][0].hist_e)
+plt.plot(np.arange(len(models[1][0].hist_e)), models[1][0].hist_e)
+plt.show()
 
 # make prediction
 yout = valid.getBestModel().predict(Xtest)
