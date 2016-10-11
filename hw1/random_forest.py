@@ -21,8 +21,7 @@ y = training_data[:, -1]
 # load testing data
 Xtest = np.load('data/testable.npy')
 
-paras = (None, 0.333)
-rf = em.random_forest(dt.dtree, paras, 1000, 1.)
+rf = em.random_forest(10, max_depth=None, max_features=None, sampleNum=None)
 
 print('Training...')
 tstart = time.time()

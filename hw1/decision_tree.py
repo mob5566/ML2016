@@ -12,13 +12,13 @@ Provides:
 ===
 Document
 
-class dtree( max_depth=None, randomFeatureSample=None, min_feature=1e-6, min_impurity=1e-6 )
+class dtree( max_depth=None, max_features=None, min_feature=1e-6, min_impurity=1e-6 )
 	- build a decision tree
 		
 		max_depth: the maximum depth of tree (i.e. tree height), if is equal to None,
 			then no height limits
-		randomFeatureSample: if it is not equal to None, it should be in (0, 1) will
-			sample the feature randomly when brancing
+		max_features: if it is not equal to None, it will
+			sample the feature randomly when branching
 		min_feature: the minimum gap between features to be distinguish
 		min_impurity: the minimum gap between impurity to be distinguish
 	
@@ -39,10 +39,10 @@ import numpy as np
 INF = 1e9
 
 class dtree(object):
-	def __init__(self, max_depth=None, randomFeatureSample=None,\
+	def __init__(self, max_depth=None, max_features=None,\
 				min_feature=1e-6, min_impurity=1e-6):
 		self.max_depth = max_depth
-		self.rfs = randomFeatureSample
+		self.max_features = max_features
 		self.min_feat = min_feature
 		self.min_impurity = min_impurity
 
@@ -57,12 +57,11 @@ class dtree(object):
 		data_num, feat_num = X.shape
 
 		# generate random feature sampling mask
-		mask = None
-		if self.rfs:
-			while not np.any(mask):
-				mask = np.random.rand(feat_num)<=self.rfs
-		else:
-			mask = np.ones(feat_num, dtype=bool)
+		mask = np.arange(feat_num)
+		np.random.shuffle(mask)
+
+		if self.max_features and self.max_features<feat_num:
+			mask = mask[:self.max_features]
 
 		# terminate 
 		if impurity(y) < self.min_impurity or \
@@ -100,8 +99,8 @@ class dtree(object):
 		
 		nextdep = self.max_depth-1 if self.max_depth else None
 		self.childs = [\
-			dtree(nextdep, self.rfs, self.min_feat, self.min_impurity),\
-			dtree(nextdep, self.rfs, self.min_feat, self.min_impurity)]
+			dtree(nextdep, self.max_features, self.min_feat, self.min_impurity),\
+			dtree(nextdep, self.max_features, self.min_feat, self.min_impurity)]
 
 		self.childs[0].fit(X[minSmask], y[minSmask])
 		self.childs[1].fit(X[np.logical_not(minSmask)], y[np.logical_not(minSmask)])
