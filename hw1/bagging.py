@@ -21,8 +21,8 @@ y = training_data[:, -1]
 # load testing data
 Xtest = np.load('data/testable.npy')
 
-paras = (None, 0.5)
-bag = em.bagging(dt.dtree, paras, 100, 0.7)
+paras = (500, 1, False, 0, True, 30, 2, True, True)
+bag = em.bagging(lrm.linreg, paras, 20, 1.0)
 
 print('Training...')
 tstart = time.time()
@@ -36,7 +36,7 @@ print('RMSE = %.3f' % lrm.RMSE(bag, X, y))
 # make prediction
 yout = bag.predict(Xtest)
 
-outputfile = open('linear_regression.csv', 'wb')
+outputfile = open('bagging.csv', 'wb')
 csv_output = csv.writer(outputfile)
 
 csv_output.writerow(['id', 'value'])

@@ -15,6 +15,7 @@ Document
 
 class linreg( maxIter=100, eta=1e-2, useL2R=False, L2R_lambda=1.,
 		useSGD=False, batchSize=100,
+		featureOrder=None, useFeatureScaling=False,
 		, useAdagrad=False):
 	- The linear regression model.
 
@@ -24,6 +25,8 @@ class linreg( maxIter=100, eta=1e-2, useL2R=False, L2R_lambda=1.,
 		L2R_lambda: if use L2 Reg., the penalty value lambda
 		useSGD: use Stochastic Gradient Descent
 		batchSize: if use SGD, the batchSize is the size of SGD batch
+		featureOrder: if it's not equal to None, it transform data to featureOrder-space
+		useFeatureScaling: scale features by (X - mu(X))/sigma(X)
 		useAdagrad: use Adagrad in gradient descent
 
 	fit( X, y ) - fit the training data (X, y)
@@ -78,8 +81,10 @@ import numpy as np
 eps = 1e-8
 
 class linreg(object):
-	def __init__(self, maxIter=100, eta=1e-2, useL2R=False, L2R_lambda=1.,\
+	def __init__(self, maxIter=100, eta=1e-2,\
+				useL2R=False, L2R_lambda=1.,\
 				useSGD=False, batchSize=100,\
+				featureOrder=None, useFeatureScaling=False,\
 				useAdagrad=False):
 		
 		self.maxIter = maxIter
@@ -88,6 +93,8 @@ class linreg(object):
 		self.L2R_lambda = L2R_lambda
 		self.useSGD = useSGD
 		self.batchSize = batchSize
+		self.featureOrder = featureOrder
+		self.useFS = useFeatureScaling
 		self.useAdagrad = useAdagrad
 
 	def fit(self, X, y):
@@ -102,6 +109,21 @@ class linreg(object):
 		
 		X = np.array(X)
 		y = np.array(y)
+
+		oriX = X
+
+		# use feature order transform
+		if self.featureOrder:
+			tX = X
+			for i in np.arange(2, self.featureOrder+1):
+				tX = np.append(tX, X**i, axis=1)
+			X = tX
+
+		# use feature scaling
+		if self.useFS:
+			self.xmean = X.mean(axis=0)
+			self.xstd = X.std(axis=0)
+			X = (X-self.xmean)/(self.xstd+eps)
 
 		# set random seed
 		np.random.seed(0)
@@ -170,11 +192,17 @@ class linreg(object):
 				self._w = self._w-self.eta*dw
 				self._b = self._b-self.eta*db
 
-			self.hist_e.append(RMSE(self, X, y))
+			self.hist_e.append(RMSE(self, oriX, y))
 	
-	def predict(self, x):
-		return np.dot(np.array(x), self._w)+self._b
-	
+	def predict(self, X):
+		if self.featureOrder:
+			tX = X
+			for i in np.arange(2, self.featureOrder+1):
+				tX = np.append(tX, X**i, axis=1)
+			X = tX
+		if self.useFS: X = (X-self.xmean)/(self.xstd+eps)
+
+		return np.dot(np.array(X), self._w)+self._b
 
 	def getEta(self):
 		return self.eta
@@ -313,7 +341,7 @@ class validation(object):
 	def scores(self):
 
 		# set random seed
-		np.random.seed(0)
+		#np.random.seed(0)
 		
 		data_num = len(self.X)
 		features_num = len(self.X[0])
@@ -353,3 +381,15 @@ class validation(object):
 
 	def getScores(self):
 		return self.scores
+	
+def pm25FeatureTransform(X, order=None, mean=None, std=None):
+	
+	# get the pm10, pm25 at each hour
+	# rX = np.append(X[:, 8::18], X[:, 9::18], axis=1)
+	rX = X
+	if order:
+		for i in np.arange(1, order+1):
+			rX = np.append(rX, X**i, axis=1)
+	rX = (X-X.mean(axis=0))/X.std(axis=0)
+
+	return rX

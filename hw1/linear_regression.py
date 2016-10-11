@@ -20,13 +20,15 @@ y = training_data[:, -1]
 Xtest = np.load('data/testable.npy')
 
 # setup linear regression model
-model = lrm.linreg( 10000, 1e-2, True, 100, useAdagrad=True, useSGD=True, batchSize=100)
+model = lrm.linreg( 100000, 1, useAdagrad=True, useSGD=True, batchSize=30, useFeatureScaling=True, featureOrder=2)
 
 print('Training...')
 tstart = time.time()
 model.fit(X, y)
 print('Done!')
 print('Training cost %.3f seconds!' % (time.time()-tstart))
+
+print 'Ein\n', lrm.RMSE(model, X, y)
 
 # make prediction
 yout = model.predict(Xtest)

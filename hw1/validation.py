@@ -29,8 +29,9 @@ Xtest = np.load('data/testable.npy')
 # Linear Regression
 #
 models = [
-[lrm.linreg(1000, 1e-2, True, 100, useAdagrad=True, useSGD=True, batchSize=100)],
-[lrm.linreg(1000, 100, True, 100, useAdagrad=True, useSGD=True, batchSize=100)]]
+[lrm.linreg(1000, 1, False, 10, useAdagrad=True, useSGD=True, batchSize=30, useFeatureScaling=True)],
+[lrm.linreg(1000, 1, False, 10, useAdagrad=True, useSGD=True, batchSize=30, useFeatureScaling=True, featureOrder=2)],
+[lrm.linreg(1000, 1, True, 1, useAdagrad=True, useSGD=True, batchSize=30, useFeatureScaling=True, featureOrder=2)]]
 
 #
 # Decision Tree
@@ -59,7 +60,7 @@ models = [
 # [DTR(max_depth=None, max_features=None, random_state=0), RFR(50, max_features=None, max_depth=None, random_state=0)],
 # [DTR(max_depth=None, max_features=None, random_state=0), RFR(100, max_features=None, max_depth=None, random_state=0)]]
 
-valid = lrm.validation(models, X, y, lrm.RMSE, 0.1 )
+valid = lrm.validation(models, X, y, lrm.RMSE, 0.2 )
 
 print('Validation...')
 tstart = time.time()
@@ -72,8 +73,9 @@ print('RMSE = %.3f' % lrm.RMSE(valid.getBestModel(), X, y))
 
 # plot the learning curve
 import matplotlib.pyplot as plt
-plt.plot(np.arange(len(models[0][0].hist_e)), models[0][0].hist_e)
-plt.plot(np.arange(len(models[1][0].hist_e)), models[1][0].hist_e)
+plt.plot(np.arange(len(models[0][0].hist_e)), models[0][0].hist_e, 'x')
+plt.plot(np.arange(len(models[1][0].hist_e)), models[1][0].hist_e, 'o')
+plt.plot(np.arange(len(models[2][0].hist_e)), models[2][0].hist_e)
 plt.show()
 
 # make prediction

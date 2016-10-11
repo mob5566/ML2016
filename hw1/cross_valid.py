@@ -19,14 +19,14 @@ y = training_data[:, -1]
 # load testing data
 Xtest = np.load('data/testable.npy')
 
-models = [[]]*5
 
-# setup linear regression models
-for i, eta in enumerate([1e-4, 1e-2, 1, 100, 10000]):
-	models[i] = [lrm.linreg(10000, eta, True, lam, useAdagrad=True)\
-		for lam in [0, 1, 10, 100, 10000]] 
+# setup learning models
+models = [
+[lrm.linreg(100, 1, useSGD=True, batchSize=20, useAdagrad=True),lrm.linreg(100, 1, useSGD=True, batchSize=30, useAdagrad=True),lrm.linreg(100, 1, useSGD=True, batchSize=50, useAdagrad=True)],
+[lrm.linreg(300, 1, useSGD=True, batchSize=20, useAdagrad=True),lrm.linreg(300, 1, useSGD=True, batchSize=30, useAdagrad=True),lrm.linreg(300, 1, useSGD=True, batchSize=50, useAdagrad=True)],
+[lrm.linreg(500, 1, useSGD=True, batchSize=20, useAdagrad=True),lrm.linreg(500, 1, useSGD=True, batchSize=30, useAdagrad=True),lrm.linreg(500, 1, useSGD=True, batchSize=50, useAdagrad=True)]]
 
-cv = lrm.cross_valid(models, X, y, lrm.RMSE)
+cv = lrm.cross_valid(models, X, y, lrm.RMSE, 5)
 
 print('Cross validation...')
 tstart = time.time()
