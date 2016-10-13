@@ -126,7 +126,7 @@ class linreg(object):
 			X = (X-self.xmean)/(self.xstd+eps)
 
 		# set random seed
-		np.random.seed(0)
+		# np.random.seed(14)
 
 		# initialize weights w and bias b with zeros
 		self._w = np.random.rand(X.shape[1])
@@ -150,47 +150,10 @@ class linreg(object):
 				for i in np.arange(0, len(X)-self.batchSize, self.batchSize):
 					tX = mX[i:i+self.batchSize]
 					ty = my[i:i+self.batchSize]
-
-					# calculate the gradient of square error with current w and b
-					dw = np.dot(2*((np.dot(tX, self._w)+self._b)-ty), tX)
-					db = 2*(((np.dot(tX, self._w)+self._b)-ty).sum())
-	
-					# if use L2 Regularization
-					if self.useL2R:
-						dw = dw+2*self.L2R_lambda*self._w
-	
-					# if use Adagrad
-					if self.useAdagrad:
-						acc_dw = acc_dw+dw**2
-						acc_db = acc_db+db**2
-	
-						dw = dw/np.sqrt(acc_dw+eps)
-						db = db/np.sqrt(acc_db+eps)
-					
-					# update the w and b
-					self._w = self._w-self.eta*dw
-					self._b = self._b-self.eta*db
+					self.gradientDescent(tX, ty)
 				
 			else:
-				# calculate the gradient of square error with current w and b
-				dw = np.dot(2*((np.dot(X, self._w)+self._b)-y), X)
-				db = 2*(((np.dot(X, self._w)+self._b)-y).sum())
-
-				# if use L2 Regularization
-				if self.useL2R:
-					dw = dw+2*self.L2R_lambda*self._w
-
-				# if use Adagrad
-				if self.useAdagrad:
-					acc_dw = acc_dw+dw**2
-					acc_db = acc_db+db**2
-
-					dw = dw/np.sqrt(acc_dw+eps)
-					db = db/np.sqrt(acc_db+eps)
-			
-				# update the w and b
-				self._w = self._w-self.eta*dw
-				self._b = self._b-self.eta*db
+				self.gradientDescent(X, y)
 
 			self.hist_e.append(RMSE(self, oriX, y))
 	
@@ -203,6 +166,28 @@ class linreg(object):
 		if self.useFS: X = (X-self.xmean)/(self.xstd+eps)
 
 		return np.dot(np.array(X), self._w)+self._b
+	
+	def gradientDescent(self, X, y):
+		# calculate the gradient of square error with current w and b
+		dw = np.dot(2*((np.dot(X, self._w)+self._b)-y), X)
+		db = 2*(((np.dot(X, self._w)+self._b)-y).sum())
+
+		# if use L2 Regularization
+		if self.useL2R:
+			dw = dw+2*self.L2R_lambda*self._w
+
+		# if use Adagrad
+		if self.useAdagrad:
+			acc_dw = acc_dw+dw**2
+			acc_db = acc_db+db**2
+
+			dw = dw/np.sqrt(acc_dw+eps)
+			db = db/np.sqrt(acc_db+eps)
+			
+		# update the w and b
+		self._w = self._w-self.eta*dw
+		self._b = self._b-self.eta*db
+		
 
 	def getEta(self):
 		return self.eta
@@ -381,15 +366,3 @@ class validation(object):
 
 	def getScores(self):
 		return self.scores
-	
-def pm25FeatureTransform(X, order=None, mean=None, std=None):
-	
-	# get the pm10, pm25 at each hour
-	# rX = np.append(X[:, 8::18], X[:, 9::18], axis=1)
-	rX = X
-	if order:
-		for i in np.arange(1, order+1):
-			rX = np.append(rX, X**i, axis=1)
-	rX = (X-X.mean(axis=0))/X.std(axis=0)
-
-	return rX

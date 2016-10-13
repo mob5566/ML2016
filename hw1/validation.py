@@ -24,8 +24,15 @@ y = training_data[:, -1]
 Xtest = np.load('data/testable.npy')
 
 # feature trimming
-# X = X[:,90:]
-# Xtest = Xtest[:,90:]
+
+fmask = np.load('data/featureSelectMask.npy')
+
+X = X[:, fmask]
+Xtest = Xtest[:, fmask]
+
+'''
+X = X[:,90:]
+Xtest = Xtest[:,90:]
 
 tX = X[:, 6::18]
 for i in [8, 9, 11]:
@@ -37,7 +44,6 @@ for i in [8, 9, 11]:
 	tXtest = np.append(tXtest, Xtest[:, i::18], axis=1)
 Xtest = tXtest
 
-'''
 tX = X[:, 3::18]
 for i in [5, 6, 8, 9, 11, 16, 17]:
 	tX = np.append(tX, X[:, i::18], axis=1)
@@ -51,14 +57,15 @@ Xtest = tXtest
 
 # setup learning models
 
+paras = (500, 1, True, 0.1, True, 30, 4, True, True)
+
 #
 # Linear Regression
 #
 models = [
 # [lrm.linreg(500, 1, True, 10, useAdagrad=True, useSGD=True, batchSize=30, useFeatureScaling=True, featureOrder=2)],
-[lrm.linreg(500, 1, True, 0.1, useAdagrad=True, useSGD=True, batchSize=30, useFeatureScaling=True, featureOrder=3)],
-[lrm.linreg(500, 1, True, 0.1, useAdagrad=True, useSGD=True, batchSize=30, useFeatureScaling=True, featureOrder=4)],
-[lrm.linreg(500, 1, True, 0.1, useAdagrad=True, useSGD=True, batchSize=30, useFeatureScaling=True, featureOrder=5)]]
+[em.bagging(lrm.linreg, paras, 500)],
+[lrm.linreg(500, 1, True, 0.1, useAdagrad=True, useSGD=True, batchSize=30, useFeatureScaling=True, featureOrder=2)]]
 
 #
 # Decision Tree

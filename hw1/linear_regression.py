@@ -19,8 +19,14 @@ y = training_data[:, -1]
 # load testing data
 Xtest = np.load('data/testable.npy')
 
+# feature trimming
+fmask = np.load('data/featureSelectMask.npy')
+
+X = X[:, fmask]
+Xtest = Xtest[:, fmask]
+
 # setup linear regression model
-model = lrm.linreg( 100000, 1, useAdagrad=True, useSGD=True, batchSize=30, useFeatureScaling=True, featureOrder=2)
+model = lrm.linreg( 500, 1, True, 0.1, useAdagrad=True, useSGD=True, batchSize=30, useFeatureScaling=True, featureOrder=2)
 
 print('Training...')
 tstart = time.time()

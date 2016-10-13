@@ -22,6 +22,11 @@ y = training_data[:, -1]
 Xtest = np.load('data/testable.npy')
 
 # feature trimming
+fmask = np.load('data/featureSelectMask.npy')
+
+X = X[:, fmask]
+Xtest = Xtest[:, fmask]
+
 '''
 tX = X[:, 6::18]
 for i in [8, 9, 11]:
@@ -32,7 +37,6 @@ tXtest = Xtest[:, 6::18]
 for i in [8, 9, 11]:
 	tXtest = np.append(tXtest, Xtest[:, i::18], axis=1)
 Xtest = tXtest
-'''
 
 tX = X[:, 3::18]
 for i in [5, 6, 7, 8, 9, 11, 12, 16, 17]:
@@ -43,6 +47,7 @@ tXtest = Xtest[:, 3::18]
 for i in [5, 6, 7, 8, 9, 11, 12, 16, 17]:
 	tXtest = np.append(tXtest, Xtest[:, i::18], axis=1)
 Xtest = tXtest
+'''
 
 # bagging
 
