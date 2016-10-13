@@ -19,12 +19,18 @@ y = training_data[:, -1]
 # load testing data
 Xtest = np.load('data/testable.npy')
 
+# feature trimming
+
+fmask = np.load('data/featureSelectMask.npy')
+
+X = X[:, fmask]
+Xtest = Xtest[:, fmask]
 
 # setup learning models
 models = [
-[lrm.linreg(100, 1, useSGD=True, batchSize=20, useAdagrad=True),lrm.linreg(100, 1, useSGD=True, batchSize=30, useAdagrad=True),lrm.linreg(100, 1, useSGD=True, batchSize=50, useAdagrad=True)],
-[lrm.linreg(300, 1, useSGD=True, batchSize=20, useAdagrad=True),lrm.linreg(300, 1, useSGD=True, batchSize=30, useAdagrad=True),lrm.linreg(300, 1, useSGD=True, batchSize=50, useAdagrad=True)],
-[lrm.linreg(500, 1, useSGD=True, batchSize=20, useAdagrad=True),lrm.linreg(500, 1, useSGD=True, batchSize=30, useAdagrad=True),lrm.linreg(500, 1, useSGD=True, batchSize=50, useAdagrad=True)]]
+[lrm.linreg(500, 1, True, 0.1, useAdagrad=True, useSGD=True, batchSize=30, useFeatureScaling=True, featureOrder=1)],
+[lrm.linreg(500, 1, True, 0.05, useAdagrad=True, useSGD=True, batchSize=30, useFeatureScaling=True, featureOrder=2)],
+[lrm.linreg(500, 1, True, 0.1, useAdagrad=True, useSGD=True, batchSize=30, useFeatureScaling=True, featureOrder=3)]]
 
 cv = lrm.cross_valid(models, X, y, lrm.RMSE, 5)
 
@@ -40,7 +46,7 @@ print('RMSE = %.3f' % lrm.RMSE(cv.getBestModel(), X, y))
 # make prediction
 yout = cv.getBestModel().predict(Xtest)
 
-outputfile = open('linear_regression.csv', 'wb')
+outputfile = open('cv_linear_regression.csv', 'wb')
 csv_output = csv.writer(outputfile)
 
 csv_output.writerow(['id', 'value'])

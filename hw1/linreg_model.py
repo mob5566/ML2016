@@ -126,15 +126,15 @@ class linreg(object):
 			X = (X-self.xmean)/(self.xstd+eps)
 
 		# set random seed
-		# np.random.seed(14)
+		np.random.seed(14)
 
 		# initialize weights w and bias b with zeros
 		self._w = np.random.rand(X.shape[1])
 		self._b = np.array(0)
 
 		# accumulate delta
-		acc_dw = np.zeros(X.shape[1])
-		acc_db = np.array(0)
+		self.acc_dw = np.zeros(X.shape[1])
+		self.acc_db = np.array(0)
 
 		self.hist_e = []
 
@@ -178,11 +178,11 @@ class linreg(object):
 
 		# if use Adagrad
 		if self.useAdagrad:
-			acc_dw = acc_dw+dw**2
-			acc_db = acc_db+db**2
+			self.acc_dw = self.acc_dw+dw**2
+			self.acc_db = self.acc_db+db**2
 
-			dw = dw/np.sqrt(acc_dw+eps)
-			db = db/np.sqrt(acc_db+eps)
+			dw = dw/np.sqrt(self.acc_dw+eps)
+			db = db/np.sqrt(self.acc_db+eps)
 			
 		# update the w and b
 		self._w = self._w-self.eta*dw
@@ -262,7 +262,7 @@ class cross_valid(object):
 		batchSize = np.floor(data_num/self.fold)
 
 		# set random seed
-		np.random.seed(0)
+		# np.random.seed(0)
 
 		# random permute 
 		data = np.random.permutation(np.insert(self.X, features_num, self.y, axis=1))
@@ -274,6 +274,7 @@ class cross_valid(object):
 		mcol = len(self.models[0])
 
 		self.scores = np.zeros(mrow*mcol).reshape(mrow, mcol)
+		self.ein = np.zeros(mrow*mcol).reshape(mrow, mcol)
 
 		# for each input models
 		for i in np.arange(mrow):
@@ -294,10 +295,16 @@ class cross_valid(object):
 					# evaluate by error function
 					self.scores[i, j] = self.scores[i, j]+\
 						self.errf(self.models[i][j], X[k, :], y[k, :])
+					self.ein[i, j] = self.ein[i, j]+\
+						self.errf(self.models[i][j],\
+						X[mask, :, :].reshape((self.fold-1)*batchSize, features_num),\
+						y[mask, :].reshape((self.fold-1)*batchSize))
 
 				self.scores[i, j] = self.scores[i, j]/self.fold
+				self.ein[i, j] = self.ein[i, j]/self.fold
 
-		print( self.scores )
+		print 'Ein:\n', self.ein 
+		print 'Scores:\n', self.scores 
 
 		self.bestmodel_r = np.argmin(self.scores)/mcol
 		self.bestmodel_c = np.argmin(self.scores)%mcol
@@ -326,7 +333,7 @@ class validation(object):
 	def scores(self):
 
 		# set random seed
-		np.random.seed(14)
+		# np.random.seed(14)
 		
 		data_num = len(self.X)
 		features_num = len(self.X[0])

@@ -57,15 +57,13 @@ Xtest = tXtest
 
 # setup learning models
 
-paras = (500, 1, True, 0.1, True, 30, 4, True, True)
-
 #
 # Linear Regression
 #
 models = [
-# [lrm.linreg(500, 1, True, 10, useAdagrad=True, useSGD=True, batchSize=30, useFeatureScaling=True, featureOrder=2)],
-[em.bagging(lrm.linreg, paras, 500)],
-[lrm.linreg(500, 1, True, 0.1, useAdagrad=True, useSGD=True, batchSize=30, useFeatureScaling=True, featureOrder=2)]]
+[lrm.linreg(500, 0.1, True, 0.05, useAdagrad=True, useSGD=True, batchSize=30, useFeatureScaling=True, featureOrder=2)],
+[lrm.linreg(500, 1, True, 0.05, useAdagrad=True, useSGD=True, batchSize=30, useFeatureScaling=True, featureOrder=2)],
+[lrm.linreg(500, 10, True, 0.05, useAdagrad=True, useSGD=True, batchSize=30, useFeatureScaling=True, featureOrder=2)]]
 
 #
 # Decision Tree
@@ -106,13 +104,12 @@ print('Training cost %.3f seconds!' % (time.time()-tstart))
 print('RMSE = %.3f' % lrm.RMSE(valid.getBestModel(), X, y))
 
 # plot the learning curve
-'''
 import matplotlib.pyplot as plt
-plt.plot(np.arange(len(models[0][0].hist_e)), models[0][0].hist_e, 'x')
-plt.plot(np.arange(len(models[1][0].hist_e)), models[1][0].hist_e, 'o')
-plt.plot(np.arange(len(models[2][0].hist_e)), models[2][0].hist_e)
+plt.plot(np.arange(len(models[0][0].hist_e)), models[0][0].hist_e, 'x-', label='eta = 0.1')
+plt.plot(np.arange(len(models[1][0].hist_e)), models[1][0].hist_e, 'o-', label='eta = 1')
+plt.plot(np.arange(len(models[2][0].hist_e)), models[2][0].hist_e, '*-', label='eta = 10')
+plt.legend(loc='upper right')
 plt.show()
-'''
 
 # make prediction
 yout = valid.getBestModel().predict(Xtest)
