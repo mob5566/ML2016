@@ -23,15 +23,42 @@ y = training_data[:, -1]
 # load testing data
 Xtest = np.load('data/testable.npy')
 
+# feature trimming
+# X = X[:,90:]
+# Xtest = Xtest[:,90:]
+
+tX = X[:, 6::18]
+for i in [8, 9, 11]:
+	tX = np.append(tX, X[:, i::18], axis=1)
+X = tX
+
+tXtest = Xtest[:, 6::18]
+for i in [8, 9, 11]:
+	tXtest = np.append(tXtest, Xtest[:, i::18], axis=1)
+Xtest = tXtest
+
+'''
+tX = X[:, 3::18]
+for i in [5, 6, 8, 9, 11, 16, 17]:
+	tX = np.append(tX, X[:, i::18], axis=1)
+X = tX
+
+tXtest = Xtest[:, 3::18]
+for i in [5, 6, 8, 9, 11, 16, 17]:
+	tXtest = np.append(tXtest, Xtest[:, i::18], axis=1)
+Xtest = tXtest
+'''
+
 # setup learning models
 
 #
 # Linear Regression
 #
 models = [
-[lrm.linreg(1000, 1, False, 10, useAdagrad=True, useSGD=True, batchSize=30, useFeatureScaling=True)],
-[lrm.linreg(1000, 1, False, 10, useAdagrad=True, useSGD=True, batchSize=30, useFeatureScaling=True, featureOrder=2)],
-[lrm.linreg(1000, 1, True, 1, useAdagrad=True, useSGD=True, batchSize=30, useFeatureScaling=True, featureOrder=2)]]
+# [lrm.linreg(500, 1, True, 10, useAdagrad=True, useSGD=True, batchSize=30, useFeatureScaling=True, featureOrder=2)],
+[lrm.linreg(500, 1, True, 0.1, useAdagrad=True, useSGD=True, batchSize=30, useFeatureScaling=True, featureOrder=3)],
+[lrm.linreg(500, 1, True, 0.1, useAdagrad=True, useSGD=True, batchSize=30, useFeatureScaling=True, featureOrder=4)],
+[lrm.linreg(500, 1, True, 0.1, useAdagrad=True, useSGD=True, batchSize=30, useFeatureScaling=True, featureOrder=5)]]
 
 #
 # Decision Tree
@@ -60,7 +87,7 @@ models = [
 # [DTR(max_depth=None, max_features=None, random_state=0), RFR(50, max_features=None, max_depth=None, random_state=0)],
 # [DTR(max_depth=None, max_features=None, random_state=0), RFR(100, max_features=None, max_depth=None, random_state=0)]]
 
-valid = lrm.validation(models, X, y, lrm.RMSE, 0.2 )
+valid = lrm.validation(models, X, y, lrm.RMSE, 0.3 )
 
 print('Validation...')
 tstart = time.time()
@@ -72,11 +99,13 @@ print('Training cost %.3f seconds!' % (time.time()-tstart))
 print('RMSE = %.3f' % lrm.RMSE(valid.getBestModel(), X, y))
 
 # plot the learning curve
+'''
 import matplotlib.pyplot as plt
 plt.plot(np.arange(len(models[0][0].hist_e)), models[0][0].hist_e, 'x')
 plt.plot(np.arange(len(models[1][0].hist_e)), models[1][0].hist_e, 'o')
 plt.plot(np.arange(len(models[2][0].hist_e)), models[2][0].hist_e)
 plt.show()
+'''
 
 # make prediction
 yout = valid.getBestModel().predict(Xtest)

@@ -157,7 +157,7 @@ class linreg(object):
 	
 					# if use L2 Regularization
 					if self.useL2R:
-						dw = dw+2*self.L2R_lambda*self._w.sum()
+						dw = dw+2*self.L2R_lambda*self._w
 	
 					# if use Adagrad
 					if self.useAdagrad:
@@ -178,7 +178,7 @@ class linreg(object):
 
 				# if use L2 Regularization
 				if self.useL2R:
-					dw = dw+2*self.L2R_lambda*self._w.sum()
+					dw = dw+2*self.L2R_lambda*self._w
 
 				# if use Adagrad
 				if self.useAdagrad:
@@ -341,7 +341,7 @@ class validation(object):
 	def scores(self):
 
 		# set random seed
-		#np.random.seed(0)
+		np.random.seed(14)
 		
 		data_num = len(self.X)
 		features_num = len(self.X[0])
