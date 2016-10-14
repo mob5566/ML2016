@@ -5,4 +5,4 @@
 # E-mail:	mob5566[at]gmail.com
 #
 
-
+python test.py
