@@ -57,8 +57,8 @@ def cross_valid(model, X, y, errf, fold=10, shuffle=True):
 	X = data[:batchSize*fold, :-1].reshape(fold, batchSize, features_num)
 	y = data[:batchSize*fold, -1].reshape(fold, batchSize)
 
-	scores = 0
-	ein = 0
+	scores = np.zeros(fold)
+	eins = np.zeros(fold)
 			
 	# cross validation
 	for k in np.arange(fold):
@@ -71,17 +71,17 @@ def cross_valid(model, X, y, errf, fold=10, shuffle=True):
 
 		# train the model by training set
 		model.fit(tX, ty)
-			
 
 		# evaluate by error function
-		score = score + errf(model, X[k, :], y[k, :])
-		ein = ein + errf(model, tX, ty)
+		scores[k] = errf(model, X[k, :], y[k, :])
+		eins[k] = errf(model, tX, ty)
 
-	score = score/fold
-	ein = ein/fold
 
-	print 'Ein: ', ein 
-	print 'Score: ', score
+	print 'Ein: ', eins.mean()
+	print 'Scores: ', scores
+	print 'Score: ', scores.mean()
+
+	return scores, eins
 
 def valid(model, X, y, errf, sampleProb=0.2, shuffle=True):
 	
@@ -98,7 +98,7 @@ def valid(model, X, y, errf, sampleProb=0.2, shuffle=True):
 	trainmask = np.random.rand(data_num)>=sampleProb
 	validmask = np.logical_not(trainmask)
 
-	scores = 0
+	score = 0
 	ein = 0
 
 	# train the model by training set
