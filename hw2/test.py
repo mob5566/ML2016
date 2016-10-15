@@ -5,41 +5,40 @@
 # Email:	mob5566[at]gmail.com or r04945028[at]ntu.edu.tw
 #
 
-import numpy as np
-import logreg_model as lgr
 import csv
+import numpy as np
 import time
+import sys
+import cPickle as pickle
 
-# load training data
-training_data = np.load('spam_data/training_data.npy')
+if len(sys.argv)!=4 or\
+	sys.argv[1][-4:]!='.pkl' or\
+	sys.argv[2][-4:]!='.csv':
+	
+	print 'In test.py:'
+	print '\tUsage: test.py model.pkl test_data.csv predict_output'
+	exit()
 
-X = training_data[:, :-1]
-y = training_data[:, -1]
+model_name = sys.argv[1]
+test_fname = sys.argv[2][:-4]
+predict_output = sys.argv[3]
+
+# load model
+with open(model_name, 'rb') as model_input:
+	model = pickle.load(model_input)
 
 # load testing data
-Xtest = np.load('spam_data/testing_data.npy')
-
-# setup linear regression model
-model = lgr.logreg(3000, 0.1, True, 0.1, useAdagrad=True, useSGD=True, batchSize=30)
-
-print('Training...')
-tstart = time.time()
-model.fit(X, y)
-print('Done!')
-print('Training cost %.3f seconds!' % (time.time()-tstart))
-
-print 'Ein\n', lgr.mismatch(model, X, y)
+Xtest = np.load(test_fname+'.npy')
 
 # make prediction
 yout = (model.predict(Xtest)>0.5).astype(np.int)
 
-outputfile = open('prediction.csv', 'wb')
-csv_output = csv.writer(outputfile)
+# write the prediction results to predict_output.csv
+with open(predict_output+'.csv', 'wb') as outputfile:
+	csv_output = csv.writer(outputfile)
 
-csv_output.writerow(['id', 'label'])
+	csv_output.writerow(['id', 'label'])
 
-for idx, value in enumerate(yout, 1):
-	csv_output.writerow([idx, value])
-
-outputfile.close()
+	for idx, value in enumerate(yout, 1):
+		csv_output.writerow([idx, value])
 
