@@ -16,8 +16,8 @@ Document
 
 class logreg( maxIter=100, eta=1e-2, useL2R=False, L2R_lambda=1.,
 		useSGD=False, batchSize=100,
-		featureOrder=None, useFeatureScaling=False,
-		, useAdagrad=False):
+		useFeatureScaling=False,
+		useAdagrad=False):
 	- The logistic regression model.
 
 		maxIter: the maximum gradient descent iterations
@@ -26,7 +26,6 @@ class logreg( maxIter=100, eta=1e-2, useL2R=False, L2R_lambda=1.,
 		L2R_lambda: if use L2 Reg., the penalty value lambda
 		useSGD: use Stochastic Gradient Descent
 		batchSize: if use SGD, the batchSize is the size of SGD batch
-		featureOrder: if it's not equal to None, it transform data to featureOrder-space
 		useFeatureScaling: scale features by (X - mu(X))/sigma(X)
 		useAdagrad: use Adagrad in gradient descent
 
@@ -44,6 +43,7 @@ class logreg( maxIter=100, eta=1e-2, useL2R=False, L2R_lambda=1.,
 '''
 
 import numpy as np
+from scipy.special import expit
 
 eps = 1e-8
 
@@ -51,7 +51,7 @@ class logreg(object):
 	def __init__(self, maxIter=100, eta=1e-2,\
 				useL2R=False, L2R_lambda=1.,\
 				useSGD=False, batchSize=100,\
-				featureOrder=None, useFeatureScaling=False,\
+				useFeatureScaling=False,\
 				useAdagrad=False):
 		
 		self.maxIter = maxIter
@@ -60,7 +60,6 @@ class logreg(object):
 		self.L2R_lambda = L2R_lambda
 		self.useSGD = useSGD
 		self.batchSize = batchSize
-		self.featureOrder = featureOrder
 		self.useFS = useFeatureScaling
 		self.useAdagrad = useAdagrad
 
@@ -78,13 +77,6 @@ class logreg(object):
 		y = np.array(y).copy()
 
 		oriX = X
-
-		# use feature order transform
-		if self.featureOrder:
-			tX = X
-			for i in np.arange(2, self.featureOrder+1):
-				tX = np.append(tX, X**i, axis=1)
-			X = tX
 
 		# use feature scaling
 		if self.useFS:
@@ -112,12 +104,12 @@ class logreg(object):
 		for i in np.arange(self.maxIter):
 			
 			if self.useSGD:
-				rmask = np.arange(len(X))
+				rmask = np.arange(data_num)
 				np.random.shuffle(rmask)
 				mX = X[rmask]
 				my = y[rmask]
 
-				for i in np.arange(0, len(X)-self.batchSize, self.batchSize):
+				for i in np.arange(0, data_num-self.batchSize, self.batchSize):
 					tX = mX[i:i+self.batchSize]
 					ty = my[i:i+self.batchSize]
 					self.gradientDescent(tX, ty)
@@ -129,19 +121,13 @@ class logreg(object):
 	
 	def predict(self, X):
 		X = np.array(X)
-		if self.featureOrder:
-			tX = X
-			for i in np.arange(2, self.featureOrder+1):
-				tX = np.append(tX, X**i, axis=1)
-			X = tX
 		if self.useFS: X = (X-self.xmean)/(self.xstd+eps)
-
 		return sigmoid(np.dot(X, self._w)+self._b)
 	
 	def gradientDescent(self, X, y):
 		# calculate the gradient of cross-entropy with current w and b
-		dw = -np.dot((y-sigmoid(np.dot(X, self._w)+self._b)), X)
-		db = -(y-sigmoid(np.dot(X, self._w)+self._b)).sum()
+		dw = np.negative(np.dot((y-sigmoid(np.dot(X, self._w)+self._b)), X))
+		db = np.negative((y-sigmoid(np.dot(X, self._w)+self._b)).sum())
 
 		# if use L2 Regularization
 		if self.useL2R:
@@ -216,4 +202,6 @@ def mismatch(model, X, y):
 	return np.logical_xor(yout, y).mean()
 
 def sigmoid(X):
-	return 1/(1+np.exp(-X))
+	signal = np.clip(X, -500, 500)
+	signal = 1.0/(1 + np.exp(-signal))
+	return signal

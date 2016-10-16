@@ -52,9 +52,9 @@ def cross_valid(model, X, y, errf, fold=10, shuffle=True):
 
 	# random permute 
 	if shuffle:
-		data = np.random.permutation(np.insert(X, features_num, y, axis=1))
+		data = np.random.permutation(np.insert(X, feat_num, y, axis=1))
 	
-	X = data[:batchSize*fold, :-1].reshape(fold, batchSize, features_num)
+	X = data[:batchSize*fold, :-1].reshape(fold, batchSize, feat_num)
 	y = data[:batchSize*fold, -1].reshape(fold, batchSize)
 
 	scores = np.zeros(fold)
@@ -77,9 +77,11 @@ def cross_valid(model, X, y, errf, fold=10, shuffle=True):
 		eins[k] = errf(model, tX, ty)
 
 
+	print '###############\n'
 	print 'Ein: ', eins.mean()
 	print 'Scores: ', scores
 	print 'Score: ', scores.mean()
+	print '\n###############\n'
 
 	return scores, eins
 
@@ -108,6 +110,8 @@ def valid(model, X, y, errf, sampleProb=0.2, shuffle=True):
 	score = errf(model, X[validmask], y[validmask])
 	ein = errf(model, X[trainmask], y[trainmask])
 
+	print '###############\n'
 	print 'Ein: ', ein 
 	print 'Score: ', score
+	print '\n###############\n'
 
