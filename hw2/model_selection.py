@@ -45,10 +45,11 @@ def cross_valid(model, X, y, errf, fold=10, shuffle=True):
 	y = y.copy()
 		
 	data_num, feat_num = X.shape
-	batchSize = np.floor(data_num/fold)
+	fold = int(fold)
+	batchSize = int(np.floor(data_num/fold))
 
 	# set random seed
-	# np.random.seed(0)
+	np.random.seed(1428)
 
 	# random permute 
 	if shuffle:
@@ -91,7 +92,7 @@ def valid(model, X, y, errf, sampleProb=0.2, shuffle=True):
 	y = y.copy()
 		
 	data_num, feat_num = X.shape
-	batchSize = np.floor(data_num/fold)
+	batchSize = int(np.floor(data_num/fold))
 
 	# set random seed
 	# np.random.seed(0)

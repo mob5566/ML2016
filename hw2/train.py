@@ -28,7 +28,7 @@ X = training_data[:, :-1]
 y = training_data[:, -1]
 
 # setup linear regression model
-model = lgr.logreg(2000, 0.05, True, 0.03, useAdagrad=True, useSGD=True, batchSize=30)
+model = lgr.logreg(50000, 0.05, True, 0.03, useAdagrad=True, useSGD=True, batchSize=30)
 
 print('Training...')
 tstart = time.time()

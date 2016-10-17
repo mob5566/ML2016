@@ -27,8 +27,9 @@ y = training_data[:, -1]
 print('\nCross validation...\n')
 
 models = [
-lgr.logreg(3000, 0.1, True, 0.1, True, 30, False, True),
-lgr.logreg(2000, 0.05, True, 0.03, True, 30, False, True)
+lgr.logreg(500, 0.05, True, 0.03, True, 30, False, True),
+lgr.logreg(1000, 0.05, True, 0.03, True, 30, False, True),
+lgr.logreg(3000, 0.05, True, 0.03, True, 30, False, True)
 ]
 
 eins = np.zeros(len(models))

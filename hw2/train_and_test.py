@@ -14,7 +14,7 @@ data = np.load('spam_data/spam_train.npy')
 X = data[:, :-1]
 y = data[:,  -1]
 
-md = lgr.logreg(2000, 0.05, True, 1., True, 30, False, True)
+md = lgr.logreg(100000, 0.05, True, 0.03, True, 30, False, True)
 
 stime = time.time()
 
