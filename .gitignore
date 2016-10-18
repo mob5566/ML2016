@@ -1,0 +1,20 @@
+# some side effect file types
+*.pyc
+*.npy
+*.zip
+*.csv
+*.pkl
+
+# scripts to train and test for models
+bagging.py
+cross_valid.py
+plot.py
+validation.py
+random_forest.py
+clean.sh
+init_test.sh
+train_and_test.py
+
+# directories
+data
+spam_data
