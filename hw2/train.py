@@ -7,6 +7,7 @@
 
 import numpy as np
 import logreg_model as lgr
+import ensemble_model as em
 import csv
 import time
 import sys
@@ -28,7 +29,7 @@ X = training_data[:, :-1]
 y = training_data[:, -1]
 
 # setup linear regression model
-model = lgr.logreg(50000, 0.05, True, 0.03, useAdagrad=True, useSGD=True, batchSize=30)
+model = em.random_forest(70, max_features=25)
 
 print('Training...')
 tstart = time.time()
