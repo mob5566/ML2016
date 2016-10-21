@@ -29,7 +29,7 @@ X = training_data[:, :-1]
 y = training_data[:, -1]
 
 # setup linear regression model
-model = em.random_forest(70, max_features=25)
+model = em.random_forest(100, max_depth=20, max_features=25)
 
 print('Training...')
 tstart = time.time()
