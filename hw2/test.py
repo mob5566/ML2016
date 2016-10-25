@@ -12,11 +12,10 @@ import sys
 import cPickle as pickle
 
 if len(sys.argv)!=4 or\
-	sys.argv[1][-4:]!='.pkl' or\
 	sys.argv[2][-4:]!='.csv':
 	
 	print 'In test.py:'
-	print '\tUsage: test.py model.pkl test_data.csv predict_output'
+	print '\tUsage: test.py model test_data.csv predict_output'
 	exit()
 
 model_name = sys.argv[1]

@@ -40,5 +40,5 @@ print('Training cost %.3f seconds!' % (time.time()-tstart))
 print 'Ein\n', lgr.mismatch(model, X, y)
 
 # save the trained model to pickle file
-with open(sys.argv[2]+'.pkl', 'wb') as output:
+with open(sys.argv[2], 'wb') as output:
 	pickle.dump(model, output, -1)
