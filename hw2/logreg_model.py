@@ -43,7 +43,6 @@ class logreg( maxIter=100, eta=1e-2, useL2R=False, L2R_lambda=1.,
 '''
 
 import numpy as np
-from scipy.special import expit
 
 eps = 1e-8
 
