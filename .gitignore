@@ -4,6 +4,7 @@
 *.zip
 *.csv
 *.pkl
+*.tgz
 
 # scripts to train and test for models
 bagging.py
