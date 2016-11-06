@@ -10,4 +10,4 @@ if [ "$#" -ne 2 ]; then
 	exit
 fi
 
-python cnn.py $1 $2
+python self_train.py $1 $2
