@@ -1,0 +1,10 @@
+# ignore models
+cnn_model
+selftrain_model
+
+# reseult files
+result
+
+# abundant scrpts
+init_train.sh
+
