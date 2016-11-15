@@ -41,7 +41,7 @@ if __name__ == '__main__':
 		sys.exit()
 
 	# make prediction by test data
-	res = model.predict_classes(test_data, 100)
+	res = np.argmax(model.predict(test_data, 50), axis=1)
 
 	# write the result to result_name
 	with open(result_name, 'wb') as file:
