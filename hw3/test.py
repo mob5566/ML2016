@@ -24,7 +24,7 @@ if __name__ == '__main__':
 
 	# load test data
 	try:
-		with open(data_dir+'/test.p', 'rb') as infile:
+		with open(data_dir+'test.p', 'rb') as infile:
 			test_file = pickle.load(infile)
 	except:
 		print 'Error: data_dir not found or test.p does not exist'

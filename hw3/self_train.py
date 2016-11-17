@@ -28,7 +28,7 @@ if __name__ == '__main__':
 
 	try:
 		# load the labeled data 5000*3*32*32
-		with open(data_dir+'/all_label.p', 'rb') as infile:
+		with open(data_dir+'all_label.p', 'rb') as infile:
 			all_label = pickle.load(infile)
 		all_label = np.array(all_label).reshape(5000, 3, 32, 32)
 
@@ -38,7 +38,7 @@ if __name__ == '__main__':
 			labels[i*500:(i+1)*500, i] = 1
 
 		# load the unlabeled data 45000*3*32*32
-		with open(data_dir+'/all_unlabel.p', 'rb') as infile:
+		with open(data_dir+'all_unlabel.p', 'rb') as infile:
 			all_unlabel = pickle.load(infile)
 		all_unlabel = np.array(all_unlabel).reshape(45000, 3, 32, 32)
 	except:
@@ -110,11 +110,13 @@ if __name__ == '__main__':
 		if len(remain_data) == 0:
 			break
 
+	'''
 	# save the self training data
-	with open(data_dir+'/st_data.p', 'wb') as file:
+	with open(data_dir+'st_data.p', 'wb') as file:
 		pickle.dump(train_data, file)
-	with open(data_dir+'/st_label.p', 'wb') as file:
+	with open(data_dir+'st_label.p', 'wb') as file:
 		pickle.dump(train_label, file)
+	'''
 
 	# setup CNN model
 	model = Sequential()
