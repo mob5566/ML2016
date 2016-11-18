@@ -8,6 +8,7 @@
 from keras.models import Sequential
 from keras.layers import Dense, Activation, Dropout, Flatten
 from keras.layers import MaxPooling2D, Convolution2D
+from keras.layers import BatchNormalization, LeakyReLU, GlobalAveragePooling2D
 from keras.optimizers import SGD
 import numpy as np
 import sys
@@ -24,7 +25,7 @@ if __name__ == '__main__':
 	modelname = sys.argv[2]
 
 	# load the labeled data 5000*3*32*32
-	with open(data_dir+'/all_label.p', 'rb') as infile:
+	with open(data_dir+'all_label.p', 'rb') as infile:
 		all_label = pickle.load(infile)
 	all_label = np.array(all_label).reshape(5000, 3, 32, 32)
 
@@ -37,36 +38,54 @@ if __name__ == '__main__':
 	model = Sequential()
 
 	# convolutional layers
-	model.add(Convolution2D(32, 3, 3, border_mode='valid', input_shape=(3, 32, 32)))
-	model.add(Activation('relu'))
-	model.add(Convolution2D(32, 3, 3, border_mode='valid'))
-	model.add(Activation('relu'))
-	model.add(MaxPooling2D(pool_size=(2, 2)))
+	model.add(Convolution2D(96, 3, 3, border_mode='same', input_shape=(3, 32, 32)))
+	model.add(BatchNormalization())
+	model.add(LeakyReLU())
+	model.add(Convolution2D(96, 3, 3, border_mode='same'))
+	model.add(BatchNormalization())
+	model.add(LeakyReLU())
+	model.add(Convolution2D(96, 3, 3, border_mode='same'))
+	model.add(BatchNormalization())
+	model.add(LeakyReLU())
 
-	model.add(Convolution2D(64, 3, 3, border_mode='valid'))
-	model.add(Activation('relu'))
-	model.add(Convolution2D(64, 3, 3, border_mode='valid'))
-	model.add(Activation('relu'))
-	model.add(MaxPooling2D(pool_size=(2, 2)))
+	model.add(MaxPooling2D((2, 2)))
+	model.add(BatchNormalization())
 
-	model.add(Flatten())
+	model.add(Convolution2D(192, 3, 3, border_mode='same'))
+	model.add(BatchNormalization())
+	model.add(LeakyReLU())
+	model.add(Convolution2D(192, 3, 3, border_mode='same'))
+	model.add(BatchNormalization())
+	model.add(LeakyReLU())
+	model.add(Convolution2D(192, 3, 3, border_mode='same'))
+	model.add(BatchNormalization())
+	model.add(LeakyReLU())
 
-	# feed-forward layers
-	model.add(Dense(128))
-	model.add(Activation('relu'))
-	model.add(Dense(128))
-	model.add(Activation('relu'))
+	model.add(MaxPooling2D((2, 2)))
+	model.add(BatchNormalization())
 
-	model.add(Dense(10))
+	model.add(Convolution2D(192, 3, 3, border_mode='same'))
+	model.add(BatchNormalization())
+	model.add(LeakyReLU())
+	model.add(Convolution2D(192, 1, 1, border_mode='same'))
+	model.add(BatchNormalization())
+	model.add(LeakyReLU())
+	model.add(Convolution2D(10, 1, 1, border_mode='same'))
+	model.add(BatchNormalization())
+	model.add(LeakyReLU())
+
+	model.add(GlobalAveragePooling2D())
+
 	model.add(Activation('softmax'))
 
 	model.compile(loss='categorical_crossentropy',\
 				  optimizer='adam',\
 				  metrics=['accuracy'])
-	
+	model.summary()
+
 	model.fit(all_label, labels,\
-			  nb_epoch=100,\
-			  batch_size=100)
+			  nb_epoch=150,\
+			  batch_size=50)
 	
 	# save the model
 	model.save(modelname)
