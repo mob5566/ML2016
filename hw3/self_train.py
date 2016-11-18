@@ -50,46 +50,53 @@ if __name__ == '__main__':
 	train_label = labels			
 	remain_data = all_unlabel		# set all unlabeled data to be labeling
 	threshold = 0.9					# threshold to add a new labeled data
-	T = 10							# total number of self-training rounds
+	T = 30							# total number of self-training rounds
+	np.random.seed(142813)
 
-	for t in np.arange(T):
+	# setup CNN model
+	model = Sequential()
 
-		# setup CNN model
-		model = Sequential()
+	# convolutional layers
+	model.add(Convolution2D(32, 3, 3, border_mode='valid', input_shape=(3, 32, 32)))
+	model.add(Activation('relu'))
+	model.add(Convolution2D(32, 3, 3, border_mode='valid'))
+	model.add(Activation('relu'))
+	model.add(MaxPooling2D(pool_size=(2, 2)))
+	model.add(Dropout(0.25))
 
-		# convolutional layers
-		model.add(Convolution2D(32, 3, 3, border_mode='valid', input_shape=(3, 32, 32)))
-		model.add(Activation('relu'))
-		model.add(Convolution2D(32, 3, 3, border_mode='valid'))
-		model.add(Activation('relu'))
-		model.add(MaxPooling2D(pool_size=(2, 2)))
+	model.add(Convolution2D(64, 3, 3, border_mode='valid'))
+	model.add(Activation('relu'))
+	model.add(Convolution2D(64, 3, 3, border_mode='valid'))
+	model.add(Activation('relu'))
+	model.add(MaxPooling2D(pool_size=(2, 2)))
+	model.add(Dropout(0.25))
 
-		model.add(Convolution2D(64, 3, 3, border_mode='valid'))
-		model.add(Activation('relu'))
-		model.add(Convolution2D(64, 3, 3, border_mode='valid'))
-		model.add(Activation('relu'))
-		model.add(MaxPooling2D(pool_size=(2, 2)))
+	model.add(Flatten())
+
+	# feed-forward layers
+	model.add(Dense(256))
+	model.add(Activation('relu'))
+	model.add(Dropout(0.5))
+
+	model.add(Dense(256))
+	model.add(Activation('relu'))
+	model.add(Dropout(0.5))
+
+	model.add(Dense(10))
+	model.add(Activation('softmax'))
+
+	model.compile(loss='categorical_crossentropy',\
+				  optimizer='adam',\
+				  metrics=['accuracy'])
+
+	from keras.models import load_model
+
+	for t in np.arange(1, T+1):
 	
-		model.add(Flatten())
-	
-		# feed-forward layers
-		model.add(Dense(128))
-		model.add(Activation('relu'))
-
-		model.add(Dense(128))
-		model.add(Activation('relu'))
-	
-		model.add(Dense(10))
-		model.add(Activation('softmax'))
-	
-		model.summary()
-
-		model.compile(loss='categorical_crossentropy',\
-					  optimizer='adam',\
-					  metrics=['accuracy'])
+		print 'Round', t, '/', T
 	
 		his = model.fit(train_data, train_label,\
-						nb_epoch=10,\
+						nb_epoch=20,\
 						batch_size=100)
 
 		if his.history['acc'][-1] < 0.5:
@@ -110,48 +117,6 @@ if __name__ == '__main__':
 		if len(remain_data) == 0:
 			break
 
-	'''
-	# save the self training data
-	with open(data_dir+'st_data.p', 'wb') as file:
-		pickle.dump(train_data, file)
-	with open(data_dir+'st_label.p', 'wb') as file:
-		pickle.dump(train_label, file)
-	'''
-
-	# setup CNN model
-	model = Sequential()
-
-	# convolutional layers
-	model.add(Convolution2D(32, 3, 3, border_mode='valid', input_shape=(3, 32, 32)))
-	model.add(Activation('relu'))
-	model.add(Convolution2D(32, 3, 3, border_mode='valid'))
-	model.add(Activation('relu'))
-	model.add(MaxPooling2D(pool_size=(2, 2)))
-	model.add(Dropout(0.5))
-
-	model.add(Convolution2D(64, 3, 3, border_mode='valid'))
-	model.add(Activation('relu'))
-	model.add(Convolution2D(64, 3, 3, border_mode='valid'))
-	model.add(Activation('relu'))
-	model.add(MaxPooling2D(pool_size=(2, 2)))
-	model.add(Dropout(0.5))
-
-	model.add(Flatten())
-
-	# feed-forward layers
-	model.add(Dense(128))
-	model.add(Activation('relu'))
-	model.add(Dense(128))
-	model.add(Activation('relu'))
-	model.add(Dropout(0.5))
-
-	model.add(Dense(10))
-	model.add(Activation('softmax'))
-
-	model.compile(loss='categorical_crossentropy',\
-				  optimizer='adam',\
-				  metrics=['accuracy'])
-	
 	model.fit(train_data, train_label,\
 			  nb_epoch=100,\
 			  batch_size=100)
