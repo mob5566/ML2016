@@ -22,6 +22,7 @@ import math
 import os
 import random
 import zipfile
+import cPickle as pickle
 
 import numpy as np
 from six.moves import urllib
@@ -233,3 +234,12 @@ try:
 
 except ImportError:
   print("Please install sklearn, matplotlib, and scipy to visualize embeddings.")
+
+# Step 7: Save the embedding matrix and dictionary to file
+
+np.save('data/em.npy', final_embeddings)
+
+with open('data/w2n.pkl', 'wb') as f:
+  pickle.dump(dictionary, f) 
+with open('data/n2w.pkl', 'wb') as f:
+  pickle.dump(reverse_dictionary, f) 
