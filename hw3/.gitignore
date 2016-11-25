@@ -1,5 +1,6 @@
 # ignore models
 cnn_model
+cnn.md
 selftrain_model
 
 # reseult files
@@ -7,4 +8,5 @@ result
 
 # abundant scrpts
 init_train.sh
+autoencoder.py
 

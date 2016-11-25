@@ -49,7 +49,7 @@ words = read_data(filename)
 print('Data size', len(words))
 
 # Step 2: Build the dictionary and replace rare words with UNK token.
-vocabulary_size = 50000
+vocabulary_size = 20000
 
 def build_dataset(words):
   count = [['UNK', -1]]
@@ -73,6 +73,7 @@ def build_dataset(words):
 data, count, dictionary, reverse_dictionary = build_dataset(words)
 del words  # Hint to reduce memory.
 print('Most common words (+UNK)', count[:10])
+print('Least common words (+UNK)', count[-10:])
 print('Sample data', data[:10], [reverse_dictionary[i] for i in data[:10]])
 
 data_index = 0
@@ -237,9 +238,9 @@ except ImportError:
 
 # Step 7: Save the embedding matrix and dictionary to file
 
-np.save('data/em.npy', final_embeddings)
+np.save('em.npy', final_embeddings)
 
-with open('data/w2n.pkl', 'wb') as f:
+with open('w2n.pkl', 'w') as f:
   pickle.dump(dictionary, f) 
-with open('data/n2w.pkl', 'wb') as f:
+with open('n2w.pkl', 'w') as f:
   pickle.dump(reverse_dictionary, f) 
