@@ -55,7 +55,7 @@ data.extend(docs)
 
 # TF-IDF
 tfidf = TfidfVectorizer(max_df=0.5, min_df=2,
-                        max_features=10000,
+                        max_features=20000,
                         stop_words='english')
 
 data = tfidf.fit_transform(data)
@@ -63,7 +63,7 @@ print('TF-IDF done')
 
 # Latent Semantic Analysis by SVD dimensionality reduction
 print('LSA start')
-svd = TruncatedSVD(256)
+svd = TruncatedSVD(5)
 normalizer = Normalizer(copy=False)
 lsa = make_pipeline(svd, normalizer)
 
@@ -86,7 +86,7 @@ import matplotlib.pyplot as plt
 print(collections.Counter(lb))
 
 tsne = TSNE(perplexity=30, n_components=2, init='pca', n_iter=5000)
-plot_only = 500
+plot_only = 1000
 plot_mask = np.zeros(len(X), dtype=bool)
 plot_mask[:plot_only] = True
 plot_mask = np.random.permutation(plot_mask)
