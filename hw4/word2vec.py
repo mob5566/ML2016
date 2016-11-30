@@ -22,6 +22,8 @@ import math
 import os
 import random
 import zipfile
+import re
+import itertools
 import cPickle as pickle
 
 import numpy as np
@@ -30,22 +32,28 @@ from six.moves import xrange  # pylint: disable=redefined-builtin
 import tensorflow as tf
 
 if len(os.sys.argv) < 2:
-	print('Usage: python word2vec.py train_file')
+	print('Usage: python word2vec.py train_file [other_train_files ...]')
 	os.sys.exit()
 
-filename = os.sys.argv[1]
+filenames = os.sys.argv[1:]
 
 # Read the data into a list of strings.
+word_pattern = r'[A-Z]+[a-z\d]*|[A-Z]*[a-z\d]+'
+word_re = re.compile(word_pattern)
+
 def read_data(filename):
+  global word_re
   """Read input file as a list of words"""
   with open(filename, 'r') as f:
-    data = tf.compat.as_str(''.join([c.lower() 
-                            if c.isalnum() or c.isspace() else ' '
-                            for c in f.read()])).split()
+    data = map(word_re.findall, f.readlines())
 
   return data
 
-words = read_data(filename)
+words = []
+for filename in filenames:
+  words.extend(read_data(filename))
+words = [map(str.lower, line) for line in words]
+words = list(itertools.chain.from_iterable(words))
 print('Data size', len(words))
 
 # Step 2: Build the dictionary and replace rare words with UNK token.
@@ -112,7 +120,7 @@ for i in range(8):
 
 batch_size = 128
 embedding_size = 128  # Dimension of the embedding vector.
-skip_window = 2       # How many words to consider left and right.
+skip_window = 1       # How many words to consider left and right.
 num_skips = 2         # How many times to reuse an input to generate a label.
 
 # We pick a random validation set to sample nearest neighbors. Here we limit the
