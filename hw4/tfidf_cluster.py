@@ -72,6 +72,8 @@ from gensim.models.phrases import Phraser
 bigram = Phrases(data)
 bigramer = Phraser(bigram)
 
+data = [' '.join(line) for line in bigramer[data]]
+
 # bigramer = Phraser.load('bigram.ph')
 
 # bigramer.save('bigram.ph')
@@ -79,8 +81,7 @@ print('Phrasing end')
 
 # TF-IDF
 print('TF-IDF start')
-data = [' '.join(line) for line in bigramer[data]]
-feat_dim = 428
+feat_dim = 20000
 
 tfidf = TfidfVectorizer(stop_words='english', max_df=0.05, min_df=2, max_features=feat_dim)
 
@@ -97,32 +98,31 @@ print('TF-IDF done')
 
 # Train the k-means model with extracted features
 print('Training K-means model')
-init_cen = np.zeros(20*feat_dim).reshape(20, -1)
-init_cen[0] = 0.1
 
 np.random.seed(142813)
 
-for i in range(feat_dim):
-  np.random.shuffle(init_cen[:, i])
-
-init_cen = np.insert(init_cen, init_cen.shape[0], np.zeros(feat_dim), axis=0)
-
-kmeans = KMeans(n_clusters=21, n_init=100, max_iter=1000, n_jobs=-1).fit(X)
+kmeans = KMeans(n_clusters=20, n_init=100, max_iter=1000, n_jobs=-1).fit(X)
 lb = kmeans.labels_
 
 print('Training done')
 
 cnt_lb = collections.Counter(lb)
 
-'''
+print(cnt_lb)
+
 # Plot the result
 from sklearn.manifold import TSNE
 import matplotlib.pyplot as plt
 
-X = X.todense()
+# X = X.todense()
 
-tsne = TSNE(perplexity=30, n_components=2, init='pca', n_iter=5000)
-plot_only = 1000
+# Dimension Reduction
+from sklearn.decomposition import NMF
+
+X = NMF(30, 'nndsvd', max_iter=2000).fit_transform(X)
+
+tsne = TSNE(perplexity=30, n_components=2, init='pca', n_iter=10000)
+plot_only = 2000
 plot_mask = np.zeros(len(X), dtype=bool)
 plot_mask[:plot_only] = True
 plot_mask = np.random.permutation(plot_mask)
@@ -130,9 +130,17 @@ low_dim_data = tsne.fit_transform(X[plot_mask])
 labels = lb[plot_mask]
 
 plt.figure(figsize=(18, 18))
-plt.scatter(low_dim_data[:,0], low_dim_data[:,1], c=labels, cmap=plt.cm.hsv)
+plt.scatter(low_dim_data[:,0], low_dim_data[:,1], c=labels, cmap='gist_rainbow')
 plt.savefig('clusters.png')
-'''
+
+# Load the correct answer
+with open('data/label_StackOverflow.txt', 'r') as f:
+  lbans = np.array(f.readlines()).astype(int)-1
+labels = lbans[plot_mask]
+
+plt.figure(figsize=(18, 18))
+plt.scatter(low_dim_data[:,0], low_dim_data[:,1], c=labels, cmap='gist_rainbow')
+plt.savefig('clusters_ans.png')
 
 # Load the test file and write the results
 print('Writing result to', result_file)
